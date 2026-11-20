@@ -25,6 +25,14 @@ export default defineConfig(() => {
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
           }
+          const indexHtml = path.join(distDir, 'index.html');
+          if (fs.existsSync(indexHtml)) {
+            for (const route of ['admin', 'boutique', 'reparation', 'contact']) {
+              const routeDir = path.join(distDir, route);
+              fs.mkdirSync(routeDir, {recursive: true});
+              fs.copyFileSync(indexHtml, path.join(routeDir, 'index.html'));
+            }
+          }
         },
       },
     ],
