@@ -1,0 +1,6 @@
+{
+  "name": "Maison Kanalou — Haute Horlogerie & Atelier",
+  "description": "Boutique horlogère haut de gamme, vente de montres hommes et femmes, bracelets et accessoires, et atelier de réparation à Zaghouan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
