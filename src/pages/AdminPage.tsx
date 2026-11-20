@@ -71,9 +71,19 @@ export function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: any = {};
+      try {
+        data = rawText ? JSON.parse(rawText) : {};
+      } catch {
+        data = {};
+      }
       if (!res.ok) {
-        setLoginError(data.error || 'Identifiants invalides.');
+        setLoginError(data.error || `Erreur serveur (${res.status}). Vérifiez la configuration de l’API.`);
+        return;
+      }
+      if (!data.token) {
+        setLoginError('Réponse invalide du serveur.');
         return;
       }
       localStorage.setItem(ADMIN_TOKEN_KEY, data.token);

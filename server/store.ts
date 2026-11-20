@@ -3,11 +3,11 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-type DbModule = typeof import('./db.ts');
+type DbModule = typeof import('./db');
 let sqlitePromise: Promise<DbModule> | null = null;
 async function getSqlite(): Promise<DbModule> {
   if (!sqlitePromise) {
-    sqlitePromise = import('./db.ts');
+    sqlitePromise = import('./db');
   }
   return sqlitePromise;
 }

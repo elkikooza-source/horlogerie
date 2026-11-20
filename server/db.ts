@@ -1,9 +1,12 @@
 import Database from 'better-sqlite3';
 import bcrypt from 'bcryptjs';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
+const DATA_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'horlogerie-zeina-data')
+  : path.resolve(process.cwd(), 'data');
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }

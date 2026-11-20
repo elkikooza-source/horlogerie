@@ -3,7 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-import * as store from './server/store.ts';
+import * as store from './server/store';
 
 export const app = express();
 const PORT = 3000;
