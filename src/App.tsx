@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { StoreProvider } from './context/StoreContext';
@@ -12,6 +12,14 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { RepairPage } from './pages/RepairPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminPage } from './pages/AdminPage';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [pathname]);
+  return null;
+}
 
 function StorefrontLayout() {
   const location = useLocation();
@@ -42,6 +50,7 @@ export default function App() {
   return (
     <StoreProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route element={<StorefrontLayout />}>
             <Route path="/" element={<HomePage />} />
@@ -49,8 +58,10 @@ export default function App() {
             <Route path="/produit/:slug" element={<ProductDetailPage />} />
             <Route path="/reparation" element={<RepairPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="*" element={<HomePage />} />
           </Route>
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/*" element={<AdminPage />} />
         </Routes>
         <ToastContainer />
       </BrowserRouter>

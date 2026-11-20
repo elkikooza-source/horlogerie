@@ -805,11 +805,42 @@ app.put(
 async function startServer() {
   await store.initStore();
 
+  // Unknown API endpoints return JSON 404 rather than SPA index.html
+  app.all('/api/*', (_req, res) => {
+    res.status(404).json({ error: 'Endpoint API introuvable.' });
+  });
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
+
+    // Serve SPA entry HTML for client routes (/admin, /boutique, etc.) before vite.middlewares
+    // so Vite's internal 404 handler cannot reject requests with non-standard Accept headers.
+    app.get('*', async (req, res, next) => {
+      const p = req.path;
+      if (
+        p.startsWith('/api/') ||
+        p.startsWith('/src/') ||
+        p.startsWith('/node_modules/') ||
+        p.startsWith('/@') ||
+        p.startsWith('/uploads/') ||
+        path.extname(p)
+      ) {
+        next();
+        return;
+      }
+      try {
+        const indexPath = path.resolve(process.cwd(), 'index.html');
+        const rawHtml = fs.readFileSync(indexPath, 'utf-8');
+        const html = await vite.transformIndexHtml(req.originalUrl, rawHtml);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+      } catch (err) {
+        next(err);
+      }
+    });
+
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(process.cwd(), 'dist');
