@@ -3,7 +3,14 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import { db, initDatabase, getSettingsObject, getAvailableSlotsForDate } from './db.ts';
+type DbModule = typeof import('./db.ts');
+let sqlitePromise: Promise<DbModule> | null = null;
+async function getSqlite(): Promise<DbModule> {
+  if (!sqlitePromise) {
+    sqlitePromise = import('./db.ts');
+  }
+  return sqlitePromise;
+}
 
 function normalizeSupabaseUrl(raw: string): string {
   const trimmed = raw.trim();
@@ -525,6 +532,7 @@ export async function initStore() {
   if (supabase) {
     await ensureSupabaseSeeded();
   } else {
+    const { initDatabase } = await getSqlite();
     initDatabase();
   }
 }
@@ -578,6 +586,7 @@ export async function getSettings(): Promise<Record<string, string>> {
     if (error) throw new Error(error.message);
     return Object.fromEntries((data || []).map((r: any) => [r.key, r.value]));
   }
+  const { getSettingsObject } = await getSqlite();
   return getSettingsObject();
 }
 
@@ -598,6 +607,7 @@ export async function updateSettings(updates: Record<string, string>): Promise<R
     return getSettings();
   }
 
+  const { db, getSettingsObject } = await getSqlite();
   const upsert = db.prepare(
     `INSERT INTO BusinessSettings (key, value, updated_at)
      VALUES (?, ?, datetime('now'))
@@ -622,6 +632,7 @@ export async function getCategories(): Promise<any[]> {
     if (error) throw new Error(error.message);
     return data || [];
   }
+  const { db } = await getSqlite();
   return db.prepare('SELECT * FROM Categories ORDER BY sort_order ASC, id ASC').all();
 }
 
@@ -653,6 +664,7 @@ export async function createCategory(name: string, description = ''): Promise<an
     return data;
   }
 
+  const { db } = await getSqlite();
   const maxOrder = (
     db.prepare('SELECT COALESCE(MAX(sort_order), 0) as m FROM Categories').get() as { m: number }
   ).m;
@@ -729,6 +741,7 @@ export async function getPublicProducts(filters: {
     return list;
   }
 
+  const { db } = await getSqlite();
   let sql = `
     SELECT p.*, c.name as category_name, c.slug as category_slug
     FROM Products p
@@ -810,6 +823,7 @@ export async function getPublicProductBySlug(
     };
   }
 
+  const { db } = await getSqlite();
   const row = db
     .prepare(
       `SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -849,6 +863,7 @@ export async function getAdminProducts(): Promise<any[]> {
     return (data || []).map(formatProductRow);
   }
 
+  const { db } = await getSqlite();
   return db
     .prepare(
       `SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -921,6 +936,7 @@ export async function createProduct(payload: any): Promise<any> {
     return formatProductRow(data);
   }
 
+  const { db } = await getSqlite();
   const existing = db.prepare('SELECT id FROM Products WHERE slug = ?').get(baseSlug);
   if (existing) {
     baseSlug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
@@ -1023,6 +1039,7 @@ export async function updateProduct(id: number, payload: any): Promise<any | nul
     return formatProductRow(updated);
   }
 
+  const { db } = await getSqlite();
   const existing = db.prepare('SELECT * FROM Products WHERE id = ?').get(id) as any;
   if (!existing) return null;
 
@@ -1094,6 +1111,7 @@ export async function deleteProduct(id: number): Promise<boolean> {
     if (error) throw new Error(error.message);
     return (data || []).length > 0;
   }
+  const { db } = await getSqlite();
   const resDel = db.prepare('DELETE FROM Products WHERE id = ?').run(id);
   return resDel.changes > 0;
 }
@@ -1289,6 +1307,7 @@ export async function createOrder(payload: {
     }
   }
 
+  const { db, getSettingsObject } = await getSqlite();
   return db.transaction(() => {
     const settings = getSettingsObject();
     const baseDeliveryFee = Number(settings.delivery_fee || 8);
@@ -1469,6 +1488,7 @@ export async function getAdminOrders(filters: {
     return list.map((o: any) => formatOrderRow(o, itemsByOrder.get(Number(o.id)) || []));
   }
 
+  const { db } = await getSqlite();
   let sql = 'SELECT * FROM Orders WHERE 1=1';
   const params: any[] = [];
   if (filters.status && filters.status !== 'all') {
@@ -1542,6 +1562,7 @@ export async function updateOrderStatus(id: number, status: string): Promise<any
     return formatOrderRow(updated, items || []);
   }
 
+  const { db } = await getSqlite();
   return db.transaction(() => {
     const existing = db.prepare('SELECT * FROM Orders WHERE id = ?').get(id) as any;
     if (!existing) return null;
@@ -1652,6 +1673,7 @@ export async function getDayAvailability(dateStr: string) {
     const bookedSet = new Set((bookedRows || []).map((r: any) => r.appointment_time));
     info = computeDaySlotsFromData(dateStr, schedulesByDay, blockedForDate, bookedSet);
   } else {
+    const { getAvailableSlotsForDate } = await getSqlite();
     info = getAvailableSlotsForDate(dateStr);
   }
 
@@ -1741,6 +1763,7 @@ export async function getMonthAvailability(monthStr: string) {
     return result;
   }
 
+  const { getAvailableSlotsForDate } = await getSqlite();
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = `${monthStr}-${String(day).padStart(2, '0')}`;
     if (dateStr < todayStr) {
@@ -1823,6 +1846,7 @@ export async function createPublicAppointment(payload: {
     return data;
   }
 
+  const { db, getAvailableSlotsForDate } = await getSqlite();
   return db.transaction(() => {
     const availability = getAvailableSlotsForDate(payload.appointment_date);
     if (!availability.slots.includes(payload.appointment_time)) {
@@ -1881,6 +1905,7 @@ export async function getAdminAppointments(filters: { date?: string; status?: st
     return data || [];
   }
 
+  const { db } = await getSqlite();
   let sql = 'SELECT * FROM Appointments WHERE 1=1';
   const params: any[] = [];
   if (filters.date) {
@@ -1960,6 +1985,7 @@ export async function createAdminAppointment(payload: {
     return data;
   }
 
+  const { db } = await getSqlite();
   return db.transaction(() => {
     const conflict = db
       .prepare(
@@ -2063,6 +2089,7 @@ export async function updateAdminAppointment(id: number, payload: any) {
     return { appointment: data };
   }
 
+  const { db } = await getSqlite();
   const existing = db.prepare('SELECT * FROM Appointments WHERE id = ?').get(id) as any;
   if (!existing) return { notFound: true };
 
@@ -2123,6 +2150,7 @@ export async function getAdminAvailability() {
     };
   }
 
+  const { db } = await getSqlite();
   const schedules = db
     .prepare("SELECT * FROM AvailabilitySlots WHERE slot_type = 'schedule' ORDER BY day_of_week ASC")
     .all()
@@ -2155,6 +2183,7 @@ export async function updateAvailabilitySchedule(schedules: any[]) {
     return;
   }
 
+  const { db } = await getSqlite();
   const updateStmt = db.prepare(`
     UPDATE AvailabilitySlots
     SET start_time = ?, end_time = ?, slot_duration_min = ?, is_working_day = ?
@@ -2196,6 +2225,7 @@ export async function blockAvailabilitySlot(payload: {
     return data;
   }
 
+  const { db } = await getSqlite();
   const ins = db
     .prepare(
       `INSERT INTO AvailabilitySlots (slot_type, specific_date, start_time, is_blocked, reason)
@@ -2212,6 +2242,7 @@ export async function unblockAvailabilitySlot(id: number) {
     await supabase.from('availability_slots').delete().eq('id', id).eq('slot_type', 'blocked');
     return;
   }
+  const { db } = await getSqlite();
   db.prepare("DELETE FROM AvailabilitySlots WHERE id = ? AND slot_type = 'blocked'").run(id);
 }
 
@@ -2255,6 +2286,7 @@ export async function loginAdmin(username: string, password: string) {
     };
   }
 
+  const { db } = await getSqlite();
   const admin = db.prepare('SELECT * FROM Admins WHERE username = ?').get(username) as any;
   if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
     return null;
@@ -2300,6 +2332,7 @@ export async function getAdminSession(token: string) {
     };
   }
 
+  const { db } = await getSqlite();
   const session = db
     .prepare(
       `SELECT s.token, a.id, a.username, a.full_name, a.role
@@ -2328,6 +2361,7 @@ export async function logoutAdmin(token: string) {
     await supabase.from('admin_sessions').delete().eq('token', token);
     return;
   }
+  const { db } = await getSqlite();
   db.prepare('DELETE FROM AdminSessions WHERE token = ?').run(token);
 }
 
@@ -2359,6 +2393,7 @@ export async function changeAdminPassword(
     return 'ok';
   }
 
+  const { db } = await getSqlite();
   const admin = db.prepare('SELECT * FROM Admins WHERE id = ?').get(adminId) as any;
   if (!admin || !bcrypt.compareSync(currentPass, admin.password_hash)) {
     return 'bad_password';
@@ -2501,6 +2536,7 @@ export async function getAdminStats(period: 'today' | 'week' | 'month') {
   }
 
   // SQLite path
+  const { db } = await getSqlite();
   const totalRevRow = db
     .prepare("SELECT COALESCE(SUM(total_amount), 0) as v FROM Orders WHERE status != 'annulee'")
     .get() as { v: number };

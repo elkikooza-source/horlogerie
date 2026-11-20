@@ -3,10 +3,9 @@ import express, { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import * as store from './server/store.ts';
 
-const app = express();
+export const app = express();
 const PORT = 3000;
 
 app.disable('x-powered-by');
@@ -44,6 +43,8 @@ app.use((req, res, next) => {
     '/tsconfig.json',
     '/vite.config.ts',
     '/metadata.json',
+    '/vercel.json',
+    '/api/index.ts',
     '/.git',
     '/.aistudio',
   ];
@@ -182,18 +183,20 @@ const ALLOWED_SETTING_KEYS = new Set([
 
 // Local uploads directory served only as fallback when Supabase is not configured
 const UPLOADS_DIR = path.resolve(process.cwd(), 'uploads');
-if (!store.isSupabaseConfigured && !fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+if (!store.isSupabaseConfigured && !process.env.VERCEL) {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+  app.use(
+    '/uploads',
+    (_req, res, next) => {
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      next();
+    },
+    express.static(UPLOADS_DIR)
+  );
 }
-app.use(
-  '/uploads',
-  (_req, res, next) => {
-    res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'");
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    next();
-  },
-  express.static(UPLOADS_DIR)
-);
 
 // Also serve src/assets/images statically in case Vite middleware doesn't catch something
 app.use('/src/assets/images', express.static(path.resolve(process.cwd(), 'src/assets/images')));
@@ -800,17 +803,26 @@ app.put(
   })
 );
 
+// Unknown API endpoints return JSON 404 rather than SPA index.html
+app.all('/api/*', (_req, res) => {
+  res.status(404).json({ error: 'Endpoint API introuvable.' });
+});
+
+let initPromise: Promise<void> | null = null;
+export async function ensureAppReady() {
+  if (!initPromise) {
+    initPromise = store.initStore();
+  }
+  await initPromise;
+}
+
 // ==================== VITE / STATIC SERVING ====================
 
 async function startServer() {
-  await store.initStore();
-
-  // Unknown API endpoints return JSON 404 rather than SPA index.html
-  app.all('/api/*', (_req, res) => {
-    res.status(404).json({ error: 'Endpoint API introuvable.' });
-  });
+  await ensureAppReady();
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -872,4 +884,19 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel, error middleware must also be attached cleanly for serverless API invocations
+if (process.env.VERCEL) {
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    if (err instanceof multer.MulterError) {
+      res.status(400).json({ error: 'Fichier trop volumineux (max 8 Mo) ou invalide.' });
+      return;
+    }
+    if (err?.message && typeof err.message === 'string' && err.message.includes('Format non autorisé')) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.status(500).json({ error: 'Une erreur serveur est survenue.' });
+  });
+} else {
+  startServer();
+}
