@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Watch } from 'lucide-react';
 
 interface ResilientImageProps {
@@ -7,6 +7,7 @@ interface ResilientImageProps {
   className?: string;
   fallbackTitle?: string;
   dark?: boolean;
+  priority?: boolean;
 }
 
 export function ResilientImage({
@@ -15,8 +16,15 @@ export function ResilientImage({
   className = '',
   fallbackTitle,
   dark = false,
+  priority = false,
 }: ResilientImageProps) {
   const [hasError, setHasError] = useState(false);
+  const [loaded, setLoaded] = useState(priority);
+
+  useEffect(() => {
+    setHasError(false);
+    setLoaded(priority);
+  }, [src, priority]);
 
   if (!src || hasError) {
     return (
@@ -41,9 +49,15 @@ export function ResilientImage({
     <img
       src={src}
       alt={alt}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchPriority={priority ? 'high' : 'auto'}
       referrerPolicy="no-referrer"
+      onLoad={() => setLoaded(true)}
       onError={() => setHasError(true)}
-      className={className}
+      className={`${className} ${
+        priority ? '' : `transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`
+      }`}
     />
   );
 }

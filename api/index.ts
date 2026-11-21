@@ -424,11 +424,14 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, supabaseConfigured: isSupabaseConfigured });
 });
 
+const PUBLIC_CATALOG_CACHE = 'public, max-age=30, s-maxage=120, stale-while-revalidate=300';
+
 app.get(
   '/api/settings',
   asyncHandler(async (_req, res) => {
     const sb = requireSupabase(res);
     if (!sb) return;
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(await getSettingsObj(sb));
   })
 );
@@ -445,6 +448,7 @@ app.get(
       .order('sort_order', { ascending: true })
       .order('id', { ascending: true });
     if (error) throw new Error(error.message);
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(data || []);
   })
 );
@@ -499,6 +503,7 @@ app.get(
       default:
         list.sort((a, b) => Number(b.is_bestseller) - Number(a.is_bestseller) || b.id - a.id);
     }
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(list);
   })
 );
@@ -532,6 +537,7 @@ app.get(
       .order('id', { ascending: false })
       .limit(3);
 
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json({
       product: formatProductRow(row),
       similar: (simRows || []).map(formatProductRow),

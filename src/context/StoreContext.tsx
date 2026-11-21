@@ -59,11 +59,33 @@ const DEFAULT_SETTINGS: BusinessSettings = {
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = 'maison_kanalou_cart_v1';
+const SETTINGS_CACHE_KEY = 'hz_settings_cache_v1';
+const CATEGORIES_CACHE_KEY = 'hz_categories_cache_v1';
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<BusinessSettings>(DEFAULT_SETTINGS);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingSettings, setLoadingSettings] = useState(true);
+  const [settings, setSettings] = useState<BusinessSettings>(() => {
+    try {
+      const cached = sessionStorage.getItem(SETTINGS_CACHE_KEY);
+      return cached ? { ...DEFAULT_SETTINGS, ...JSON.parse(cached) } : DEFAULT_SETTINGS;
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
+  });
+  const [categories, setCategories] = useState<Category[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loadingSettings, setLoadingSettings] = useState(() => {
+    try {
+      return !sessionStorage.getItem(SETTINGS_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
@@ -99,10 +121,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ]);
       if (settingsRes.ok) {
         const data = await settingsRes.json();
-        setSettings((prev) => ({ ...prev, ...data }));
+        setSettings((prev) => {
+          const merged = { ...prev, ...data };
+          try {
+            sessionStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(merged));
+          } catch {
+            // ignore storage errors
+          }
+          return merged;
+        });
       }
       if (catRes.ok) {
-        setCategories(await catRes.json());
+        const catData = await catRes.json();
+        setCategories(catData);
+        try {
+          sessionStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(catData));
+        } catch {
+          // ignore storage errors
+        }
       }
     } catch {
       // Fallback to defaults silently

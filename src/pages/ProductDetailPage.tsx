@@ -108,6 +108,7 @@ export function ProductDetailPage() {
                 src={selectedImage || allImages[0]}
                 alt={product.name}
                 fallbackTitle={product.name}
+                priority
                 className="w-full h-full object-cover"
               />
             </div>

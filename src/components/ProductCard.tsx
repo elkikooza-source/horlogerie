@@ -25,11 +25,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0.9, y: 8 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
+      viewport={{ once: true, amount: 0.1 }}
       whileHover={{ y: -3 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="group flex flex-col bg-[#FAF8F4] border border-[#0A0A0B]/10 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(10,10,11,0.18)]"

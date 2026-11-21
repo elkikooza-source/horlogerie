@@ -40,6 +40,7 @@ export function RepairPage() {
             src={settings.repair_banner_image}
             alt="Atelier de réparation horlogère"
             dark
+            priority
             className="w-full h-full object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0C] via-[#0B0B0C]/70 to-[#0B0B0C]/60" />

@@ -3,6 +3,7 @@ import { Upload, Save, Lock } from 'lucide-react';
 import { BusinessSettings } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { ResilientImage } from '../../components/ResilientImage';
+import { compressImageFile } from '../../utils/imageOptimize';
 
 interface AdminSettingsProps {
   token: string;
@@ -30,8 +31,10 @@ export function AdminSettings({ token }: AdminSettingsProps) {
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const maxDimension = field === 'logo_url' ? 800 : 1600;
+    const optimized = await compressImageFile(file, { maxDimension, quality: 0.85 });
     const fd = new FormData();
-    fd.append('image', file);
+    fd.append('image', optimized);
 
     const res = await fetch('/api/admin/upload', {
       method: 'POST',

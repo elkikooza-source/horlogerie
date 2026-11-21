@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, Search, Upload, Star, X } from 'lucide-react';
 import { Category, Product } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { ResilientImage } from '../../components/ResilientImage';
+import { compressImageFile } from '../../utils/imageOptimize';
 
 interface AdminProductsProps {
   token: string;
@@ -110,8 +111,9 @@ export function AdminProducts({ token }: AdminProductsProps) {
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
+        const optimized = await compressImageFile(file, { maxDimension: 1400, quality: 0.84 });
         const fd = new FormData();
-        fd.append('image', file);
+        fd.append('image', optimized);
         const res = await fetch('/api/admin/upload', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },

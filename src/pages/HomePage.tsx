@@ -10,10 +10,25 @@ import { LocationSection } from '../components/LocationSection';
 
 type ShowcaseTab = 'bestseller' | 'new' | 'hommes' | 'femmes' | 'accessoires';
 
+const PRODUCTS_CACHE_KEY = 'hz_products_cache_v1';
+
 export function HomePage() {
   const { settings, formatPrice } = useStore();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
   const [activeTab, setActiveTab] = useState<ShowcaseTab>('bestseller');
 
   useEffect(() => {
@@ -22,7 +37,13 @@ export function HomePage() {
       try {
         const res = await fetch('/api/products');
         if (res.ok && active) {
-          setProducts(await res.json());
+          const data = await res.json();
+          setProducts(data);
+          try {
+            sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(data));
+          } catch {
+            // ignore storage errors
+          }
         }
       } catch {
         // silent
@@ -95,15 +116,16 @@ export function HomePage() {
       {/* 1. HERO SECTION */}
       <section className="relative bg-[#0A0A0B] text-[#F5F2EB] overflow-hidden min-h-[75vh] sm:min-h-[82vh] flex items-center">
         <motion.div
-          initial={{ scale: 1.07, opacity: 0.65 }}
+          initial={{ scale: 1.02, opacity: 0.9 }}
           animate={{ scale: 1, opacity: 0.85 }}
-          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="absolute inset-0"
         >
           <ResilientImage
             src={settings.hero_image}
             alt="Garde-temps de haute horlogerie Horlogerie Zeina"
             dark
+            priority
             className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0B] via-[#0A0A0B]/75 to-transparent" />

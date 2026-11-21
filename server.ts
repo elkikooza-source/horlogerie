@@ -199,7 +199,10 @@ if (!store.isSupabaseConfigured && !process.env.VERCEL) {
 }
 
 // Also serve src/assets/images statically in case Vite middleware doesn't catch something
-app.use('/src/assets/images', express.static(path.resolve(process.cwd(), 'src/assets/images')));
+app.use(
+  '/src/assets/images',
+  express.static(path.resolve(process.cwd(), 'src/assets/images'), { maxAge: '7d' })
+);
 
 const ALLOWED_IMAGE_MIMES: Record<string, string> = {
   'image/jpeg': '.jpg',
@@ -251,9 +254,12 @@ async function requireAdmin(req: AuthenticatedRequest, res: Response, next: Next
 
 // ==================== PUBLIC ROUTES ====================
 
+const PUBLIC_CATALOG_CACHE = 'public, max-age=30, s-maxage=120, stale-while-revalidate=300';
+
 app.get(
   '/api/settings',
   asyncHandler(async (_req, res) => {
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(await store.getSettings());
   })
 );
@@ -261,6 +267,7 @@ app.get(
 app.get(
   '/api/categories',
   asyncHandler(async (_req, res) => {
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(await store.getCategories());
   })
 );
@@ -281,6 +288,7 @@ app.get(
       sort: sort ? String(sort) : undefined,
     });
 
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(products);
   })
 );
@@ -293,6 +301,7 @@ app.get(
       res.status(404).json({ error: 'Produit introuvable.' });
       return;
     }
+    res.setHeader('Cache-Control', PUBLIC_CATALOG_CACHE);
     res.json(data);
   })
 );
@@ -856,8 +865,22 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distDir, { dotfiles: 'ignore' }));
+    app.use(
+      express.static(distDir, {
+        dotfiles: 'ignore',
+        setHeaders(res, filePath) {
+          if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+          } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          } else {
+            res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+          }
+        },
+      })
+    );
     app.get('*', (_req, res) => {
+      res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(path.join(distDir, 'index.html'));
     });
   }
