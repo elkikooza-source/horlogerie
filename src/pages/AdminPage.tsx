@@ -16,6 +16,7 @@ import { AdminProducts } from './admin/AdminProducts';
 import { AdminOrders } from './admin/AdminOrders';
 import { AdminAppointments } from './admin/AdminAppointments';
 import { AdminSettings } from './admin/AdminSettings';
+import { BrandWordmark } from '../components/BrandWordmark';
 
 type AdminTab = 'overview' | 'products' | 'orders' | 'appointments' | 'settings';
 
@@ -125,8 +126,8 @@ export function AdminPage() {
             <Lock className="w-4 h-4" />
             <span className="text-xs font-medium tracking-[0.2em]">ESPACE PROTÉGÉ</span>
           </div>
-          <h1 className="font-serif text-3xl font-semibold text-white mb-1">
-            {settings.brand_name || 'Horlogerie Zeina'}
+          <h1 className="font-serif text-white mb-1.5">
+            <BrandWordmark name={settings.brand_name || 'Horlogerie Zeina'} size="admin" />
           </h1>
           <p className="text-xs text-white/60 mb-7">
             Connectez-vous pour accéder à l’administration de la boutique et de l’atelier.
@@ -199,10 +200,12 @@ export function AdminPage() {
       {/* Sidebar */}
       <aside className="w-full lg:w-64 bg-[#0B0B0C] text-[#F7F5F0] shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-white/10">
         <div className="px-6 py-5 border-b border-white/10">
-          <p className="font-serif text-xl font-semibold text-white">
-            {settings.brand_name || 'Horlogerie Zeina'}
-          </p>
-          <p className="text-[11px] text-[#C5A46D] mt-0.5">Administration</p>
+          <BrandWordmark
+            name={settings.brand_name || 'Horlogerie Zeina'}
+            size="footer"
+            className="text-white text-xl"
+          />
+          <p className="text-[11px] text-[#C5A46D] mt-1">Administration</p>
         </div>
 
         <nav className="flex lg:flex-col overflow-x-auto no-scrollbar lg:overflow-visible p-3 gap-1">

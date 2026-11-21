@@ -32,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
       transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group flex flex-col bg-[#FAF8F4] border border-[#0A0A0B]/10 transition-shadow duration-300 hover:shadow-[0_18px_40px_-18px_rgba(10,10,11,0.18)]"
+      className="group flex flex-col bg-[#FAF8F4] border border-[#0A0A0B]/10 hover:border-[#C4A773]/55 transition-all duration-300 hover:shadow-[0_20px_44px_-20px_rgba(10,10,11,0.16)]"
     >
       <Link
         to={`/produit/${product.slug}`}
@@ -42,25 +42,25 @@ export function ProductCard({ product }: ProductCardProps) {
           src={displayedImage}
           alt={product.name}
           fallbackTitle={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
         />
         {outOfStock ? (
-          <div className="liquid-glass-dark absolute inset-x-0 bottom-0 text-[#F5F2EB] text-xs font-medium px-3 py-2 tracking-wide text-center">
+          <div className="liquid-glass-dark absolute inset-x-0 bottom-0 text-[#F5F2EB] text-[11px] font-medium px-3 py-2 tracking-[0.14em] text-center">
             Épuisé
           </div>
         ) : hasPromo ? (
-          <div className="liquid-glass-dark absolute top-3 left-3 text-[#C4A773] text-[11px] font-medium px-2.5 py-1 tracking-wider">
+          <div className="liquid-glass-dark absolute top-3 left-3 text-[#C4A773] text-[10px] font-medium px-2.5 py-1 tracking-[0.16em]">
             Privilège
           </div>
         ) : product.is_new ? (
-          <div className="liquid-glass absolute top-3 left-3 text-[#0A0A0B] text-[11px] font-medium px-2.5 py-1 tracking-wider">
+          <div className="liquid-glass absolute top-3 left-3 text-[#0A0A0B] text-[10px] font-medium px-2.5 py-1 tracking-[0.16em]">
             Nouveau
           </div>
         ) : null}
       </Link>
 
-      <div className="flex-1 flex flex-col p-5">
-        <div className="flex items-center gap-2 text-xs text-[#6E685D] mb-1">
+      <div className="flex-1 flex flex-col p-6">
+        <div className="flex items-center gap-2 text-[11px] tracking-[0.06em] text-[#6E685D] mb-1.5">
           <span className="truncate">{product.category_name}</span>
           {product.reference ? (
             <>
@@ -72,7 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <Link
           to={`/produit/${product.slug}`}
-          className="font-serif text-xl font-medium text-[#0A0A0B] group-hover:text-[#85693A] transition-colors line-clamp-1 mb-2"
+          className="font-serif text-[22px] leading-snug font-medium text-[#0A0A0B] group-hover:text-[#85693A] transition-colors line-clamp-1 mb-2.5"
         >
           {product.name}
         </Link>
@@ -91,14 +91,14 @@ export function ProductCard({ product }: ProductCardProps) {
           </span>
         </div>
 
-        <div className="mt-auto pt-3.5 border-t border-[#0A0A0B]/8 flex items-center gap-2.5">
+        <div className="mt-auto pt-4 border-t border-[#0A0A0B]/8 flex items-center gap-2.5">
           <motion.button
             type="button"
             disabled={outOfStock}
             whileHover={outOfStock ? undefined : { scale: 1.015 }}
             whileTap={outOfStock ? undefined : { scale: 0.97 }}
             onClick={() => addToCart(product, 1, false)}
-            className="btn-sheen flex-1 inline-flex items-center justify-center gap-1.5 px-3 min-h-[44px] text-xs font-medium bg-[#0A0A0B] text-[#F5F2EB] hover:bg-[#1C1C20] disabled:opacity-35 disabled:cursor-not-allowed transition-colors whitespace-nowrap cursor-pointer"
+            className="btn-sheen flex-1 inline-flex items-center justify-center gap-1.5 px-3 min-h-[44px] text-xs font-medium tracking-wide bg-[#0A0A0B] text-[#F5F2EB] hover:bg-[#1C1C20] disabled:opacity-35 disabled:cursor-not-allowed transition-colors whitespace-nowrap cursor-pointer"
           >
             <ShoppingBag className="w-3.5 h-3.5 text-[#C4A773]" />
             <span>Ajouter</span>
@@ -109,7 +109,7 @@ export function ProductCard({ product }: ProductCardProps) {
             whileHover={outOfStock ? undefined : { scale: 1.015 }}
             whileTap={outOfStock ? undefined : { scale: 0.97 }}
             onClick={() => addToCart(product, 1, true)}
-            className="inline-flex items-center justify-center gap-1 px-3.5 min-h-[44px] text-xs font-medium border border-[#0A0A0B]/20 text-[#0A0A0B] hover:border-[#0A0A0B] hover:bg-[#0A0A0B]/5 disabled:opacity-35 disabled:cursor-not-allowed transition-colors whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center justify-center gap-1 px-3.5 min-h-[44px] text-xs font-medium tracking-wide border border-[#0A0A0B]/20 text-[#0A0A0B] hover:border-[#85693A] hover:text-[#85693A] disabled:opacity-35 disabled:cursor-not-allowed transition-colors whitespace-nowrap cursor-pointer"
           >
             <span>Acheter</span>
             <ArrowUpRight className="w-3.5 h-3.5 text-[#85693A]" />

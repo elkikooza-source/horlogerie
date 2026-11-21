@@ -26,6 +26,9 @@
   body {
     overflow-x: clip;
     overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, .font-display {
@@ -35,6 +38,16 @@
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+.hairline-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 167, 115, 0.45) 50%,
+    transparent 100%
+  );
 }
 
 .no-scrollbar {
@@ -54,29 +67,29 @@
 .liquid-glass {
   background: linear-gradient(
     135deg,
-    rgba(250, 248, 244, 0.78) 0%,
-    rgba(245, 242, 235, 0.56) 100%
+    rgba(250, 248, 244, 0.84) 0%,
+    rgba(245, 242, 235, 0.64) 100%
   );
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(135%);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
   border: 1px solid rgba(10, 10, 11, 0.08);
   box-shadow:
-    0 14px 38px -16px rgba(10, 10, 11, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    0 14px 38px -16px rgba(10, 10, 11, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .liquid-glass-dark {
   background: linear-gradient(
     135deg,
-    rgba(20, 20, 23, 0.72) 0%,
-    rgba(10, 10, 11, 0.58) 100%
+    rgba(20, 20, 23, 0.78) 0%,
+    rgba(10, 10, 11, 0.64) 100%
   );
-  backdrop-filter: blur(24px) saturate(145%);
-  -webkit-backdrop-filter: blur(24px) saturate(145%);
-  border: 1px solid rgba(196, 167, 115, 0.22);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid rgba(196, 167, 115, 0.24);
   box-shadow:
     0 24px 52px -18px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Subtle Silk Sheen Button Sweep */

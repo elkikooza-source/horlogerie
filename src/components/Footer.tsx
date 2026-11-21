@@ -2,21 +2,26 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, MapPin, Mail, Instagram, Facebook, ExternalLink } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import { BrandWordmark } from './BrandWordmark';
 
 export function Footer() {
   const { settings } = useStore();
   const cleanPhone = (settings.phone || '+216 56 375 456').replace(/\s+/g, '');
 
   return (
-    <footer className="bg-[#0A0A0B] text-[#F5F2EB] border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <footer className="bg-[#0A0A0B] text-[#F5F2EB] border-t border-[#C4A773]/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand Column */}
           <div>
-            <h3 className="font-serif text-2xl font-medium text-[#F5F2EB] mb-3">
-              {settings.brand_name || 'Horlogerie Zeina'}
-            </h3>
-            <p className="text-xs text-[#F5F2EB]/60 leading-relaxed mb-5">
+            <Link to="/" className="group inline-block mb-3">
+              <BrandWordmark
+                name={settings.brand_name || 'Horlogerie Zeina'}
+                size="footer"
+                className="text-[#F5F2EB] group-hover:text-[#C4A773] transition-colors"
+              />
+            </Link>
+            <p className="text-xs text-[#F5F2EB]/60 leading-relaxed mb-5 max-w-xs">
               {settings.hero_slogan}
             </p>
             <div className="flex items-center gap-3">

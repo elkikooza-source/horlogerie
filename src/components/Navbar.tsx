@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '../context/StoreContext';
+import { BrandWordmark } from './BrandWordmark';
 
 export function Navbar() {
   const { settings, cartCount, openCart } = useStore();
@@ -27,13 +28,13 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-[#0A0A0B]/85 backdrop-blur-xl border-b border-white/10 text-[#F5F2EB]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-8">
-        {/* Zone 1: Brand wordmark */}
+    <header className="sticky top-0 z-40 bg-[#0A0A0B]/88 backdrop-blur-xl border-b border-[#C4A773]/18 text-[#F5F2EB]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex items-center justify-between gap-8">
+        {/* Zone 1: Brand wordmark with watch-O */}
         <Link
           to="/"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-2.5 min-w-0 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C4A773]"
+          className="flex items-center gap-2.5 min-w-0 shrink-0 group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C4A773]"
         >
           {settings.logo_url ? (
             <img
@@ -43,15 +44,17 @@ export function Navbar() {
               className="h-8 w-auto object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
             />
           ) : null}
-          <span className="font-serif text-lg sm:text-2xl font-medium tracking-wide text-[#F5F2EB] group-hover:text-[#C4A773] transition-colors duration-200 truncate">
-            {settings.brand_name || 'Horlogerie Zeina'}
-          </span>
+          <BrandWordmark
+            name={settings.brand_name || 'Horlogerie Zeina'}
+            size="nav"
+            className="text-[#F5F2EB] group-hover:text-[#D5BC8E] transition-colors duration-200"
+          />
         </Link>
 
         {/* Zone 2: Clean single-line navigation */}
         <nav
           aria-label="Navigation principale"
-          className="hidden lg:flex items-center gap-7 text-[13px] font-normal tracking-wide"
+          className="hidden lg:flex items-center gap-7 text-[13px] font-normal tracking-[0.03em]"
         >
           {navItems.map((item) => {
             const active = isActive(item.to);

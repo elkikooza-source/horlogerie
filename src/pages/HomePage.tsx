@@ -132,20 +132,28 @@ export function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-[#0A0A0B]/45" />
         </motion.div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-24 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 items-end">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-end">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-7"
             >
-              <p className="text-[11px] font-medium tracking-[0.26em] text-[#C4A773] mb-3 sm:mb-4">
-                HORLOGERIE ZEINA · ZAGHOUAN
-              </p>
-              <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-medium leading-[1.08] text-balance text-[#F5F2EB] mb-7 sm:mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-8 h-px bg-[#C4A773]" aria-hidden="true" />
+                <p className="text-[11px] font-medium tracking-[0.26em] text-[#C4A773]">
+                  HORLOGERIE ZEINA · ZAGHOUAN
+                </p>
+              </div>
+              <h1 className="font-serif text-3xl sm:text-5xl lg:text-[3.5rem] font-medium leading-[1.06] text-balance text-[#F5F2EB] mb-5">
                 {settings.hero_slogan}
               </h1>
+              {settings.hero_subtitle && (
+                <p className="text-sm sm:text-[15px] text-[#F5F2EB]/72 max-w-xl leading-relaxed mb-8">
+                  {settings.hero_subtitle}
+                </p>
+              )}
 
               <div className="flex flex-wrap items-center gap-4">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
@@ -171,23 +179,41 @@ export function HomePage() {
             {/* Floating Liquid Glass Signature Card */}
             {heroProduct && (
               <motion.div
-                initial={{ opacity: 0, y: 26 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.85, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.6, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -4 }}
-                className="lg:col-span-5 lg:justify-self-end w-full max-w-sm"
+                className="lg:col-span-5 lg:justify-self-end w-full max-w-md"
               >
                 <Link
                   to={`/produit/${heroProduct.slug}`}
-                  className="liquid-glass-dark block p-6 group transition-all duration-300"
+                  className="liquid-glass-dark block p-5 sm:p-6 group transition-all duration-300 hover:border-[#C4A773]/50"
                 >
-                  <div className="flex items-center justify-between text-[11px] tracking-[0.2em] text-[#C4A773] mb-2">
+                  <div className="flex items-center justify-between text-[10px] tracking-[0.22em] text-[#C4A773] mb-3">
                     <span>PIÈCE SIGNATURE</span>
-                    <span className="font-mono">{heroProduct.reference}</span>
+                    <span className="font-mono tabular-nums">{heroProduct.reference}</span>
                   </div>
-                  <h2 className="font-serif text-2xl font-medium text-[#F5F2EB] group-hover:text-[#C4A773] transition-colors">
-                    {heroProduct.name}
-                  </h2>
+                  <div className="flex items-center gap-4">
+                    {(heroProduct.primary_image || heroProduct.images?.[0]) && (
+                      <div className="w-20 h-16 shrink-0 bg-[#141417] border border-white/10 overflow-hidden">
+                        <ResilientImage
+                          src={heroProduct.primary_image || heroProduct.images[0]}
+                          alt={heroProduct.name}
+                          dark
+                          priority
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-[#F5F2EB]/55 mb-0.5 truncate">
+                        {heroProduct.category_name}
+                      </p>
+                      <h2 className="font-serif text-xl sm:text-2xl font-medium text-[#F5F2EB] group-hover:text-[#C4A773] transition-colors truncate">
+                        {heroProduct.name}
+                      </h2>
+                    </div>
+                  </div>
                   <div className="mt-4 pt-3.5 border-t border-white/10 flex items-center justify-between">
                     <span className="font-mono tabular-nums text-base font-medium text-[#F5F2EB]">
                       {formatPrice(heroProduct.promo_price ?? heroProduct.price)}
@@ -283,20 +309,20 @@ export function HomePage() {
       </section>
 
       {/* 3. VISUAL UNIVERSES (HOMMES / FEMMES / ACCESSOIRES) */}
-      <section className="py-16 bg-[#F5F2EB] border-t border-[#0A0A0B]/8">
+      <section className="py-16 sm:py-20 bg-[#F5F2EB] border-t border-[#0A0A0B]/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {universes.map((u, idx) => (
               <motion.div
                 key={u.title}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0.9, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.45, delay: idx * 0.08 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
               >
                 <Link
                   to={u.to}
-                  className="group relative block aspect-[4/3] overflow-hidden bg-[#141417]"
+                  className="group relative block aspect-[4/3] overflow-hidden bg-[#141417] border border-[#0A0A0B]/10 hover:border-[#C4A773]/60 transition-colors"
                 >
                   <ResilientImage
                     src={u.image}
@@ -304,9 +330,12 @@ export function HomePage() {
                     dark
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/20 to-transparent" />
                   <div className="liquid-glass-dark absolute inset-x-4 bottom-4 p-4 flex items-center justify-between gap-3 transition-transform duration-300 group-hover:-translate-y-1">
                     <div>
+                      <span className="block font-mono text-[10px] tracking-[0.2em] text-[#C4A773] mb-0.5">
+                        0{idx + 1}.
+                      </span>
                       <h3 className="font-serif text-xl font-medium text-[#F5F2EB]">{u.title}</h3>
                       <p className="text-xs text-[#F5F2EB]/65">{u.subtitle}</p>
                     </div>
@@ -319,26 +348,20 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 4. POURQUOI NOUS CHOISIR ? */}
-      <section className="py-16 bg-[#F5F2EB] border-t border-[#0A0A0B]/8">
+      {/* 4. ARCHITECTURAL ENGAGEMENTS STRIP */}
+      <section className="py-12 bg-[#F5F2EB] border-t border-[#0A0A0B]/8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {pillars.map((item, idx) => {
+          <div className="bg-[#FAF8F4] border border-[#0A0A0B]/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#0A0A0B]/10">
+            {pillars.map((item) => {
               const Icon = item.icon;
               return (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  whileHover={{ y: -3 }}
-                  transition={{ duration: 0.35, delay: idx * 0.06 }}
-                  className="liquid-glass p-6"
-                >
-                  <Icon className="w-5 h-5 text-[#85693A] mb-3 stroke-[1.4]" />
-                  <h3 className="text-sm font-semibold text-[#0A0A0B] mb-1">{item.title}</h3>
-                  <p className="text-xs text-[#5A5449]">{item.desc}</p>
-                </motion.div>
+                <div key={item.title} className="p-6 sm:p-7 flex flex-col">
+                  <Icon className="w-5 h-5 text-[#85693A] mb-3.5 stroke-[1.35]" />
+                  <h3 className="font-serif text-lg font-medium text-[#0A0A0B] mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-[#5A5449] leading-relaxed">{item.desc}</p>
+                </div>
               );
             })}
           </div>
@@ -389,15 +412,16 @@ export function HomePage() {
       </section>
 
       {/* 6. À PROPOS */}
-      <section className="py-16 bg-[#F5F2EB] border-b border-[#0A0A0B]/8">
+      <section className="py-20 bg-[#F5F2EB] border-b border-[#0A0A0B]/8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-[11px] font-medium tracking-[0.24em] text-[#85693A] mb-2">
+          <div className="hairline-gold w-28 mx-auto mb-6" aria-hidden="true" />
+          <p className="text-[11px] font-medium tracking-[0.26em] text-[#85693A] mb-2.5">
             NOTRE MAISON
           </p>
-          <h2 className="font-serif text-3xl font-medium text-[#0A0A0B] mb-4">
+          <h2 className="font-serif text-3xl sm:text-4xl font-medium text-[#0A0A0B] text-balance mb-5">
             {settings.about_title}
           </h2>
-          <p className="text-sm text-[#5A5449] leading-relaxed">{settings.about_text}</p>
+          <p className="text-sm sm:text-[15px] text-[#5A5449] leading-relaxed">{settings.about_text}</p>
         </div>
       </section>
 
