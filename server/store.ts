@@ -1597,6 +1597,30 @@ export async function updateOrderStatus(id: number, status: string): Promise<any
   })();
 }
 
+export async function deleteAdminOrders(ids: number[]): Promise<number> {
+  const cleanIds = Array.from(
+    new Set(ids.map((n) => Number(n)).filter((n) => Number.isInteger(n) && n > 0))
+  ).slice(0, 200);
+
+  if (cleanIds.length === 0) return 0;
+
+  if (supabase) {
+    await ensureSupabaseSeeded();
+    const { data, error } = await supabase
+      .from('orders')
+      .delete()
+      .in('id', cleanIds)
+      .select('id');
+    if (error) throw new Error(error.message);
+    return (data || []).length;
+  }
+
+  const { db } = await getSqlite();
+  const placeholders = cleanIds.map(() => '?').join(', ');
+  const info = db.prepare(`DELETE FROM Orders WHERE id IN (${placeholders})`).run(...cleanIds);
+  return info.changes;
+}
+
 // ==================== AVAILABILITY & APPOINTMENTS ====================
 
 function computeDaySlotsFromData(

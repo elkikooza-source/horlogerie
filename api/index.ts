@@ -1464,6 +1464,51 @@ app.patch(
   })
 );
 
+app.post(
+  '/api/admin/orders/bulk-delete',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const sb = requireSupabase(res);
+    if (!sb) return;
+    const rawIds = req.body?.ids;
+    if (!Array.isArray(rawIds) || rawIds.length === 0 || rawIds.length > 200) {
+      res.status(400).json({ error: 'Veuillez sélectionner au moins une commande valide.' });
+      return;
+    }
+    const cleanIds = Array.from(
+      new Set(rawIds.map((n: any) => Number(n)).filter((n: number) => Number.isInteger(n) && n > 0))
+    ).slice(0, 200);
+    if (cleanIds.length === 0) {
+      res.status(400).json({ error: 'Identifiants de commandes invalides.' });
+      return;
+    }
+    const { data, error } = await sb.from('orders').delete().in('id', cleanIds).select('id');
+    if (error) throw new Error(error.message);
+    res.json({ ok: true, deletedCount: (data || []).length });
+  })
+);
+
+app.delete(
+  '/api/admin/orders/:id',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const sb = requireSupabase(res);
+    if (!sb) return;
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({ error: 'Identifiant commande invalide.' });
+      return;
+    }
+    const { data, error } = await sb.from('orders').delete().eq('id', id).select('id');
+    if (error) throw new Error(error.message);
+    if (!data || data.length === 0) {
+      res.status(404).json({ error: 'Commande introuvable.' });
+      return;
+    }
+    res.json({ ok: true, deletedCount: data.length });
+  })
+);
+
 app.get(
   '/api/admin/appointments',
   requireAdmin,

@@ -677,6 +677,38 @@ app.patch(
   })
 );
 
+app.post(
+  '/api/admin/orders/bulk-delete',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const rawIds = req.body?.ids;
+    if (!Array.isArray(rawIds) || rawIds.length === 0 || rawIds.length > 200) {
+      res.status(400).json({ error: 'Veuillez sélectionner au moins une commande valide.' });
+      return;
+    }
+    const deletedCount = await store.deleteAdminOrders(rawIds);
+    res.json({ ok: true, deletedCount });
+  })
+);
+
+app.delete(
+  '/api/admin/orders/:id',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({ error: 'Identifiant commande invalide.' });
+      return;
+    }
+    const deletedCount = await store.deleteAdminOrders([id]);
+    if (deletedCount === 0) {
+      res.status(404).json({ error: 'Commande introuvable.' });
+      return;
+    }
+    res.json({ ok: true, deletedCount });
+  })
+);
+
 // Admin Appointments & Availability
 app.get(
   '/api/admin/appointments',
