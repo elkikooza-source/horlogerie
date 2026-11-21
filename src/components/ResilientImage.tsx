@@ -19,12 +19,10 @@ export function ResilientImage({
   priority = false,
 }: ResilientImageProps) {
   const [hasError, setHasError] = useState(false);
-  const [loaded, setLoaded] = useState(priority);
 
   useEffect(() => {
     setHasError(false);
-    setLoaded(priority);
-  }, [src, priority]);
+  }, [src]);
 
   if (!src || hasError) {
     return (
@@ -53,11 +51,8 @@ export function ResilientImage({
       decoding={priority ? 'sync' : 'async'}
       fetchPriority={priority ? 'high' : 'auto'}
       referrerPolicy="no-referrer"
-      onLoad={() => setLoaded(true)}
       onError={() => setHasError(true)}
-      className={`${className} ${
-        priority ? '' : `transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`
-      }`}
+      className={className}
     />
   );
 }
